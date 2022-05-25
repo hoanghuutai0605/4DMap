@@ -1,0 +1,17 @@
+.root{
+    
+}
+
+.vertical{
+    display: none;
+    opacity: 0;
+    background-color: red;
+}
+.right{
+    display: none;
+    opacity: 0;
+}
+.horizontal{
+    display: none;
+    opacity: 0;
+}
