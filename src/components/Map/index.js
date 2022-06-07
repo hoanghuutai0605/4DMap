@@ -19,6 +19,7 @@ import Typography from "@mui/material/Typography";
 import React, { useEffect, useRef, useState } from "react";
 import Crop54Icon from "@mui/icons-material/Crop54";
 import "./style.css";
+import { chunk } from "lodash";
 
 function Map() {
   // VARIABLE FOR OPTIONS MAP4D
@@ -62,13 +63,21 @@ function Map() {
   const circle = useRef(null);
   const [isLength, setIsLength] = useState(false);
   const [array, setArray] = useState([]);
+  const [arrayConvert, setArrayConvert] = useState([]);
   const length = useRef(null);
-
+  const moveMouse = useRef(null);
+  const [lengthMap, setLengthMap] = useState([]);
+  const path1 = useRef(null);
+  const pathRef = useRef(null);
+  const dblClick = useRef(null);
+  const [isDblClick, setIsDblClick] = useState(false);
   // VARIABLE for AREA
   const [isArea, setIsArea] = useState(false);
   const area = useRef(null);
   const polyline = useRef(null);
-  const [areaMap, setAreaMap] = useState(null); 
+
+  const polylineMove = useRef(null);
+  const [areaMap, setAreaMap] = useState(null);
 
   useEffect(() => {
     my4dMap.current = new map4d.Map(document.getElementById("map"), options);
@@ -216,16 +225,17 @@ function Map() {
       setLng(null);
     }
   };
-  console.log(lng);
-  // ve duuong thang
+  // console.log(lng);
+  // VẼ ĐƯỜNG THẲNG CÓ MOVE MOUSE
   const getLength = (e) => {
     if (!isLength) {
       const cloneArray = cloneDeep(array);
+      const cloneArrayConvert = cloneDeep(arrayConvert);
+
       length.current = my4dMap.current.addListener(
         "click",
         (args) => {
-          // console.log("Click", args.location);
-
+          // dblClick.current.remove();
           if (circle.current) {
             circle.current.setMap(null);
           }
@@ -239,40 +249,78 @@ function Map() {
             strokeColor: "#0b1561",
           });
           circle.current.setMap(my4dMap.current);
-          // circle.current.setMap(null);
-          cloneArray.push(args.location);
-
+          const propertyValues = Object.values(args.location);
+          [propertyValues[0], propertyValues[1]] = [
+            propertyValues[1],
+            propertyValues[0],
+          ];
+          cloneArray.push(propertyValues);
+          path1.current = cloneArray[cloneArray.length - 1];
+          if (cloneArray.length >= 1) {
+            // nếu có điểm đầu rồi thì bắt location move chuột
+            moveMouse.current = my4dMap.current.addListener(
+              "mouseMove",
+              (args) => {
+                const values = Object.values(args.location);
+                [values[0], values[1]] = [values[1], values[0]];
+                let array = path1.current.concat(values);
+                pathRef.current = chunk(array, 2);
+                // PUSH LOCATION HIÊN TẠI CỦA CHUỘT VÀO MẢNG NHƯNG MÀ LÀM SAO ĐỂ NÓ HIỆN LÊN ĐƯỜNG THẲNG :)))
+                if (polylineMove.current) {
+                  polylineMove.current.setMap(null);
+                }
+                polylineMove.current = new map4d.Polyline({
+                  path: pathRef.current,
+                  strokeColor: "#44749b",
+                  strokeOpacity: 1,
+                  strokeWidth: 2,
+                });
+                polylineMove.current.setMap(my4dMap.current);
+              },
+              { marker: true, polygon: true, polyline: true, location: true }
+            );
+          }
           if (cloneArray.length >= 2) {
-            // đủ 2 marker rồi nè, vẽ polyline thôi
-
-            if (polygon.current) {
-              polygon.current.setMap(null);
-              console.log("object", polygon.current);
+            if (polyline.current) {
+              polyline.current.setMap(null);
             }
 
-            // chuyển từ polygon sang polyline nếu muốn tính diện tích
-            polygon.current = new map4d.Polygon({
-              fillOpacity: 0,
+            polyline.current = new map4d.Polyline({
+              path: cloneArray,
               strokeColor: "#44749b",
-              userInteractionEnabled: true,
-              strokeWidth: 1.5,
-              paths: [cloneArray],
+              strokeOpacity: 1,
+              strokeWidth: 2,
             });
-
-            console.log(("object", polygon.current));
-            polygon.current.setMap(my4dMap.current);
-            let measure = new map4d.Measure([
-              [106.700147, 10.773201],
-              [106.700763, 10.771783],
-              [106.701901, 10.772302],
-              [106.701493, 10.773267],
-            ]);
+            polyline.current.setMap(my4dMap.current);
+            let measure = new map4d.Measure(cloneArray);
             let length = measure.length;
-            console.log("Chieu dai", length);
-            // setTimeout(()=>{
-            //   polygon.setMap(null)
-            // },3000)
+            setLengthMap(length);
           }
+
+          // dbclick
+          dblClick.current = my4dMap.current.addListener(
+            "dblClick",
+            (args) => {
+              const values = Object.values(args.location);
+              console.log("object", values);
+              length.current.remove();
+              moveMouse.current.remove();
+              path1.current = [];
+              pathRef.current = [];
+            },
+            {
+              location: true,
+              mappoi: true,
+              mapbuilding: true,
+              marker: true,
+              polygon: true,
+              polyline: true,
+              circle: true,
+              poi: true,
+              building: true,
+              place: true,
+            }
+          );
         },
         {
           location: true,
@@ -281,26 +329,59 @@ function Map() {
           circle: true,
         }
       );
+      // dblClick.current.remove();
       setArray(cloneArray);
-      console.log("array 1", array.length);
+      setArrayConvert(cloneArrayConvert);
+      // console.log("array 1", array.length);
     } else {
       setArray([]);
       length.current.remove();
-      polygon.current.setMap(null);
+      moveMouse.current.remove();
+      polyline.current.setMap(null);
       circle.current.setMap(null);
+      polylineMove.current.setMap(null);
+      path1.current = [];
+      pathRef.current = [];
+      setLengthMap(null);
     }
     setIsLength(!isLength);
   };
 
   // VẼ HÌNH CHỮ NHẬT
-
   const getArea = (e) => {
     if (!isArea) {
       const cloneArray = cloneDeep(array);
+      const cloneArrayConvert = cloneDeep(arrayConvert);
       area.current = my4dMap.current.addListener(
         "click",
         (args) => {
-          // console.log("Click", args.location);
+          dblClick.current = my4dMap.current.addListener(
+            "dblClick",
+            (args) => {
+              area.current.remove();
+              moveMouse.current.remove();
+              path1.current = [];
+              pathRef.current = [];
+            },
+            {
+              location: true,
+              mappoi: true,
+              mapbuilding: true,
+              marker: true,
+              polygon: true,
+              polyline: true,
+              circle: true,
+              poi: true,
+              building: true,
+              place: true,
+            }
+          );
+          // dblClick.current.remove();
+          // setArray([]);
+          // setArrayConvert([]);
+          // path1.current = [];
+          // pathRef.current = [];
+          // setAreaMap(null);
 
           if (circle.current) {
             circle.current.setMap(null);
@@ -315,23 +396,71 @@ function Map() {
             strokeColor: "#0b1561",
           });
           circle.current.setMap(my4dMap.current);
-          // circle.current.setMap(null);
-          // convert args từ object => arr
+
+          //ve polygon
+          cloneArrayConvert.push(args.location);
+          // console.log("Array Convert", cloneArrayConvert);
+          let firstElement = [cloneArrayConvert[0]];
+          if (cloneArrayConvert.length >= 2) {
+            if (polygon.current) {
+              polygon.current.setMap(null);
+              // console.log("object", polygon.current);
+            }
+            const array = cloneArrayConvert.concat(firstElement);
+            // chuyển từ polygon sang polyline nếu muốn tính diện tích
+            polygon.current = new map4d.Polygon({
+              fillOpacity: 0.1,
+              strokeColor: "#44749b",
+              userInteractionEnabled: true,
+              strokeWidth: 1.5,
+              paths: [array],
+            });
+
+            // console.log(("object", polygon.current));
+            polygon.current.setMap(my4dMap.current);
+          }
+
+          // ve polyline
           const propertyValues = Object.values(args.location);
           [propertyValues[0], propertyValues[1]] = [
             propertyValues[1],
             propertyValues[0],
           ];
-
           cloneArray.push(propertyValues);
-          console.log("Array ", cloneArray);
-
+          path1.current = cloneArray[cloneArray.length - 1];
+          // console.log(path1.current);
+          if (cloneArray) {
+            // nếu có điểm đầu rồi thì bắt location move chuột
+            moveMouse.current = my4dMap.current.addListener(
+              "mouseMove",
+              (args) => {
+                const values = Object.values(args.location);
+                [values[0], values[1]] = [values[1], values[0]];
+                let array = path1.current.concat(values);
+                pathRef.current = chunk(array, 2);
+                // PUSH LOCATION HIÊN TẠI CỦA CHUỘT VÀO MẢNG NHƯNG MÀ LÀM SAO ĐỂ NÓ HIỆN LÊN ĐƯỜNG THẲNG :)))
+                if (polylineMove.current) {
+                  polylineMove.current.setMap(null);
+                  // console.log("object", polylineMove.current);
+                }
+                polylineMove.current = new map4d.Polyline({
+                  path: pathRef.current,
+                  strokeColor: "#44749b",
+                  strokeOpacity: 1,
+                  strokeWidth: 2,
+                });
+                // console.log(("object", polylineMove.current));
+                polylineMove.current.setMap(my4dMap.current);
+              },
+              { marker: true, polygon: true, polyline: true, location: true }
+            );
+          }
           if (cloneArray.length >= 2) {
             // đủ 2 marker rồi nè, vẽ polyline thôi
 
             if (polyline.current) {
               polyline.current.setMap(null);
-              console.log("object", polygon.current);
+              // console.log("object", polyline.current);
             }
 
             // chuyển từ polygon sang polyline nếu muốn tính diện tích
@@ -343,17 +472,12 @@ function Map() {
               closed: true,
             });
 
-            console.log(("object", polyline.current));
+            // console.log(("object", polyline.current));
             polyline.current.setMap(my4dMap.current);
-            let measure = new map4d.Measure(
-              cloneArray
-            );
+            let measure = new map4d.Measure(cloneArray);
             let area = measure.area;
-            console.log("Area", area);
+            // console.log("Area", area);
             setAreaMap(area);
-            // setTimeout(()=>{
-            //   polygon.setMap(null)
-            // },3000)
           }
         },
         {
@@ -364,32 +488,23 @@ function Map() {
         }
       );
       setArray(cloneArray);
-      console.log("array 1", array.length);
+      setArrayConvert(cloneArrayConvert);
+      // console.log("array 1", array.length);
     } else {
       setArray([]);
+      setArrayConvert([]);
       area.current.remove();
+      moveMouse.current.remove();
       polyline.current.setMap(null);
+      polygon.current.setMap(null);
       circle.current.setMap(null);
+      polylineMove.current.setMap(null);
+      path1.current = [];
+      pathRef.current = [];
       setAreaMap(null);
     }
     setIsArea(!isArea);
   };
-  // CLEAR
-  // const getClear = (e) => {
-  //   setIsClear(!isClear);
-  //   if (!isMarker) {
-  //     setArray([]);
-  //     length.current.remove();
-  //     geolocation.current.remove();
-  //     marker.current.setMap(null);
-  //     polygon.current.setMap(null);
-  //     circle.current.setMap(null);
-
-  //   } else {
-  //     // TẮT KHÔNG CHO CLICK MARKER NỮA
-  //     // marker.current.remove();
-  //   }
-  // };
   return (
     //
     <Box
@@ -772,7 +887,7 @@ function Map() {
             top: 5,
             right: 10,
             height: 60,
-            width: 250,
+            width: 270,
             zIndex: 1000,
             backgroundColor: "white",
             borderRadius: 2,
@@ -783,13 +898,61 @@ function Map() {
               transform: "translate(0%, 10%)",
             }}
           >
-            <Typography sx={{ pl: 2 }} variant="subtitle2" gutterBottom>
-              Kinh độ (X): {lng}
-            </Typography>
-            <Typography sx={{ pl: 2 }} variant="subtitle2" gutterBottom>
-              Vĩ độ (Y): {lat}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                gap: 0,
+              }}
+            >
+              <Typography sx={{ pl: 2 }} variant="subtitle2" gutterBottom>
+                Kinh độ (X):
+              </Typography>
+              <Typography sx={{ pl: 0.5 }} variant="subtitle2" gutterBottom>
+                {lng}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+              }}
+            >
+              <Typography sx={{ pl: 2 }} variant="subtitle2" gutterBottom>
+                Vĩ độ (Y):
+              </Typography>
+              <Typography sx={{ pl: 2.5 }} variant="subtitle2" gutterBottom>
+                {lat}
+              </Typography>
+            </Box>
           </Box>
+        </Box>
+      ) : (
+        <Box />
+      )}
+      {isLength ? (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 5,
+            right: 10,
+            height: 60,
+            width: 280,
+            zIndex: 1000,
+            backgroundColor: "white",
+            borderRadius: 2,
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+        >
+          <Typography sx={{ pl: 2 }} variant="subtitle2" gutterBottom>
+            Chiều dài: {lengthMap} (m)
+          </Typography>
         </Box>
       ) : (
         <Box />
@@ -805,20 +968,18 @@ function Map() {
             zIndex: 1000,
             backgroundColor: "white",
             borderRadius: 2,
-            display: 'flex',
-              justifyContent: 'flex-start',
-              alignItems:'center'
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center",
           }}
         >
-          
-            <Typography sx={{ pl: 2,  }} variant="subtitle2" gutterBottom>
-              Diện tích: {areaMap} (m2)
-            </Typography>
+          <Typography sx={{ pl: 2 }} variant="subtitle2" gutterBottom>
+            Diện tích: {areaMap} (m2)
+          </Typography>
         </Box>
       ) : (
         <Box />
       )}
-      
     </Box>
   );
 }
