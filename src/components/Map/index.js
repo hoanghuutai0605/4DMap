@@ -21,6 +21,7 @@ import Crop54Icon from "@mui/icons-material/Crop54";
 import "./style.css";
 import { chunk } from "lodash";
 
+
 function Map() {
   // VARIABLE FOR OPTIONS MAP4D
 
@@ -187,7 +188,7 @@ function Map() {
     onChange: handleChange,
     exclusive: true,
   };
-  // LAY VI TRI
+  // LAY MARKER
   const getMarker = (e) => {
     setIsMarker(!isMarker);
     if (!isMarker) {
@@ -347,7 +348,8 @@ function Map() {
     setIsLength(!isLength);
   };
 
-  // VẼ HÌNH CHỮ NHẬT
+  // 
+  // VẼ HÌNH CHỮ NHẬT // k tái sử dụng  
   const getArea = (e) => {
     if (!isArea) {
       const cloneArray = cloneDeep(array);
@@ -376,12 +378,6 @@ function Map() {
               place: true,
             }
           );
-          // dblClick.current.remove();
-          // setArray([]);
-          // setArrayConvert([]);
-          // path1.current = [];
-          // pathRef.current = [];
-          // setAreaMap(null);
 
           if (circle.current) {
             circle.current.setMap(null);
@@ -412,7 +408,7 @@ function Map() {
               fillOpacity: 0.1,
               strokeColor: "#44749b",
               userInteractionEnabled: true,
-              strokeWidth: 1.5,
+              strokeWidth: 2,
               paths: [array],
             });
 
