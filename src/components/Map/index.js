@@ -20,7 +20,13 @@ import React, { useEffect, useRef, useState } from "react";
 import Crop54Icon from "@mui/icons-material/Crop54";
 import "./style.css";
 import { chunk } from "lodash";
-
+import Zoom from "./Zoom";
+import Direction from "./Direction";
+import Geolocation from "./Geolocation";
+import Bearing from "./Bearing";
+import Tilt from "./Tilt";
+import Footer from "./Footer";
+import Panel from "./Panel";
 
 function Map() {
   // VARIABLE FOR OPTIONS MAP4D
@@ -72,6 +78,7 @@ function Map() {
   const pathRef = useRef(null);
   const dblClick = useRef(null);
   const [isDblClick, setIsDblClick] = useState(false);
+
   // VARIABLE for AREA
   const [isArea, setIsArea] = useState(false);
   const area = useRef(null);
@@ -87,22 +94,36 @@ function Map() {
     my4dMap.current.setMapType(map4d.MapType.raster);
   }, []);
 
+  // console.log("1", cameraRef.current);
   // ZOOM MAP
-  const handleSetZoom = (isZoomIn) => {
-    if (isZoomIn) {
-      setZoom(zoom + 1);
-      cameraRef.current.setZoom(zoom + 1);
-    } else {
-      setZoom(zoom - 1);
-      cameraRef.current.setZoom(zoom - 1);
-      if (options.zoom < 17) {
-        setShow(true);
-        my4dMap.current.setMapType(map4d.MapType.raster);
-      }
+
+  // const handleSetZoomIn = () => {
+
+  // };
+  const handleMapZoom = (zoom) => {
+    cameraRef.current.setZoom(zoom);
+    if (zoom < 17) {
+      setShow(true);
+      my4dMap.current.setMapType(map4d.MapType.raster);
     }
-    // console.log(my4dMap.current.getBounds(PaddingOptions));
     my4dMap.current.moveCamera(cameraRef.current);
   };
+
+  // const handleSetZoom = (isZoomIn) => {
+  //   if (isZoomIn) {
+  //     setZoom(zoom + 1);
+  //     cameraRef.current.setZoom(zoom + 1);
+  //   } else {
+  //     setZoom(zoom - 1);
+  //     cameraRef.current.setZoom(zoom - 1);
+  //     if (options.zoom < 17) {
+  //       setShow(true);
+  //       my4dMap.current.setMapType(map4d.MapType.raster);
+  //     }
+  //   }
+  //   // console.log(my4dMap.current.getBounds(PaddingOptions));
+  //   my4dMap.current.moveCamera(cameraRef.current);
+  // };
 
   // SET TYPE MAP
   const handleSetMapType = () => {
@@ -117,77 +138,56 @@ function Map() {
   };
 
   // NGHIÊNG MAP
-  const handleSetTilt = (increase) => {
-    increase ? setTilt(tilt + 5) : setTilt(tilt - 5);
-    cameraRef.current.setTilt(increase ? tilt + 5 : tilt - 5);
+  const handleMapTilt = (value) => {
+    // increase ? setTilt(tilt + 5) : setTilt(tilt - 5);
+    setTilt(value);
+    cameraRef.current.setTilt(value);
     my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
   };
 
   // XOAY MAP
-  const handleSetBearing = (turn) => {
-    if (turn) {
-      setBearing(bearing + 15);
-      setRotate(rotate + 15);
-    } else {
-      setBearing(bearing - 15);
-      setRotate(rotate - 15);
-    }
-    cameraRef.current.setBearing(turn ? bearing + 15 : bearing - 15);
+  const handleMapBearing = (bearing) => {
+    setBearing(bearing);
+    setRotate(bearing);
+
+    cameraRef.current.setBearing(bearing);
     my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
   };
 
   // LẤY VỊ TRÍ HIỆN TẠI
-  const handleMoveCamera = () => {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        let lat = position.coords.latitude;
-        let lng = position.coords.longitude;
-        cameraRef.current.setTarget({
-          lat: lat,
-          lng: lng,
-        });
-
-        // // cameraRef.current = my4dMap.current.getCamera();
-        // setZoom(18);
-        // cameraRef.current.setZoom(18);
-        my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
-        let marker = new map4d.Marker({
-          position: { lat: lat, lng: lng },
-        });
-        marker.setMap(my4dMap.current);
-      },
-      function (error) {
-        console.error("Error Code = " + error.code + " - " + error.message);
-      },
-      {
-        enableHighAccuracy: true,
-      }
-    );
+  const handleMapGeolocation = (target) => {
+    cameraRef.current.setTarget(target);
+    my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
+    let marker = new map4d.Marker({
+      position: target,
+    });
+    marker.setMap(my4dMap.current);
   };
 
   // CHINH HUONG
 
-  const handleDirectional = () => {
-    setBearing(0);
-    setRotate(0);
-    cameraRef.current.setBearing(0);
+  const handleDirectional = (value) => {
+    console.log(value);
+    setBearing(value);
+    setRotate(value);
+    cameraRef.current.setBearing(value);
     my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
   };
 
   // Marker
 
   // UI
-  const [alignment, setAlignment] = React.useState(null);
+  // const [alignment, setAlignment] = React.useState(null);
 
-  const handleChange = (event, newAlignment) => {
-    setAlignment(newAlignment);
-  };
+  // const handleChange = (event, newAlignment) => {
+  //   setAlignment(newAlignment);
+  // };
 
-  const control = {
-    value: alignment,
-    onChange: handleChange,
-    exclusive: true,
-  };
+  // const control = {
+  //   value: alignment,
+  //   onChange: handleChange,
+  //   exclusive: true,
+  // };
   // LAY MARKER
   const getMarker = (e) => {
     setIsMarker(!isMarker);
@@ -250,12 +250,9 @@ function Map() {
             strokeColor: "#0b1561",
           });
           circle.current.setMap(my4dMap.current);
-          const propertyValues = Object.values(args.location);
-          [propertyValues[0], propertyValues[1]] = [
-            propertyValues[1],
-            propertyValues[0],
-          ];
-          cloneArray.push(propertyValues);
+          const valueArr = Object.values(args.location);
+          [valueArr[0], valueArr[1]] = [valueArr[1], valueArr[0]];
+          cloneArray.push(valueArr);
           path1.current = cloneArray[cloneArray.length - 1];
           if (cloneArray.length >= 1) {
             // nếu có điểm đầu rồi thì bắt location move chuột
@@ -266,7 +263,7 @@ function Map() {
                 [values[0], values[1]] = [values[1], values[0]];
                 let array = path1.current.concat(values);
                 pathRef.current = chunk(array, 2);
-                // PUSH LOCATION HIÊN TẠI CỦA CHUỘT VÀO MẢNG NHƯNG MÀ LÀM SAO ĐỂ NÓ HIỆN LÊN ĐƯỜNG THẲNG :)))
+                // PUSH LOCATION HIÊN TẠI CỦA CHUỘT VÀO
                 if (polylineMove.current) {
                   polylineMove.current.setMap(null);
                 }
@@ -304,6 +301,7 @@ function Map() {
             (args) => {
               const values = Object.values(args.location);
               console.log("object", values);
+              //XÓA EVENT
               length.current.remove();
               moveMouse.current.remove();
               path1.current = [];
@@ -348,8 +346,8 @@ function Map() {
     setIsLength(!isLength);
   };
 
-  // 
-  // VẼ HÌNH CHỮ NHẬT // k tái sử dụng  
+  //
+  // VẼ HÌNH CHỮ NHẬT 
   const getArea = (e) => {
     if (!isArea) {
       const cloneArray = cloneDeep(array);
@@ -417,12 +415,9 @@ function Map() {
           }
 
           // ve polyline
-          const propertyValues = Object.values(args.location);
-          [propertyValues[0], propertyValues[1]] = [
-            propertyValues[1],
-            propertyValues[0],
-          ];
-          cloneArray.push(propertyValues);
+          const valueArr = Object.values(args.location);
+          [valueArr[0], valueArr[1]] = [valueArr[1], valueArr[0]];
+          cloneArray.push(valueArr);
           path1.current = cloneArray[cloneArray.length - 1];
           // console.log(path1.current);
           if (cloneArray) {
@@ -434,10 +429,9 @@ function Map() {
                 [values[0], values[1]] = [values[1], values[0]];
                 let array = path1.current.concat(values);
                 pathRef.current = chunk(array, 2);
-                // PUSH LOCATION HIÊN TẠI CỦA CHUỘT VÀO MẢNG NHƯNG MÀ LÀM SAO ĐỂ NÓ HIỆN LÊN ĐƯỜNG THẲNG :)))
+                // PUSH LOCATION HIÊN TẠI CỦA CHUỘT VÀO MẢNG
                 if (polylineMove.current) {
                   polylineMove.current.setMap(null);
-                  // console.log("object", polylineMove.current);
                 }
                 polylineMove.current = new map4d.Polyline({
                   path: pathRef.current,
@@ -445,7 +439,6 @@ function Map() {
                   strokeOpacity: 1,
                   strokeWidth: 2,
                 });
-                // console.log(("object", polylineMove.current));
                 polylineMove.current.setMap(my4dMap.current);
               },
               { marker: true, polygon: true, polyline: true, location: true }
@@ -453,12 +446,9 @@ function Map() {
           }
           if (cloneArray.length >= 2) {
             // đủ 2 marker rồi nè, vẽ polyline thôi
-
             if (polyline.current) {
               polyline.current.setMap(null);
-              // console.log("object", polyline.current);
             }
-
             // chuyển từ polygon sang polyline nếu muốn tính diện tích
             polyline.current = new map4d.Polyline({
               path: cloneArray,
@@ -485,8 +475,8 @@ function Map() {
       );
       setArray(cloneArray);
       setArrayConvert(cloneArrayConvert);
-      // console.log("array 1", array.length);
     } else {
+      // Làm trống mảng để lần vẽ tiếp theo bắt đầu lại mảng mới, Xóa các event
       setArray([]);
       setArrayConvert([]);
       area.current.remove();
@@ -552,109 +542,10 @@ function Map() {
             gap: 1,
           }}
         >
-          <Box
-            sx={{
-              width: "24%",
-              height: "15%",
-              // backgroundColor: "red",
-              boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-              borderRadius: 1,
-              overflow: "hidden",
-            }}
-          >
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={0}
-              sx={{ height: "100%" }}
-            >
-              <IconButton
-                onClick={() => handleSetBearing(true)}
-                sx={{
-                  height: "100%",
-                  width: "50%",
-                  borderRadius: 0,
-                  transition: "0.2s",
-                  background: "white",
-                  borderRight: "1px solid rgb(178, 178, 250)",
-                  boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                  "&:hover": {
-                    background: "rgb(178, 178, 178)",
-                  },
-                }}
-              >
-                <TurnSlightRightIcon fontSize="inherit" />
-              </IconButton>
-              <IconButton
-                onClick={() => handleSetBearing(false)}
-                sx={{
-                  height: "100%",
-                  width: "50%",
-                  borderRadius: 0,
-                  transition: "0.2s",
-                  background: "white",
-                  boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                  "&:hover": {
-                    background: "rgb(178, 178, 178)",
-                  },
-                }}
-              >
-                <TurnSlightLeftIcon fontSize="inherit" />
-              </IconButton>
-            </Stack>
-          </Box>
-          <Box
-            sx={{
-              width: "12%",
-              height: "30%",
-              // backgroundColor: "red",
-              display: "flex",
-              flexDirection: "column",
-              borderRadius: 1,
-              overflow: "hidden",
-            }}
-          >
-            <Stack
-              direction="column"
-              alignItems="center"
-              spacing={0}
-              sx={{ height: "100%" }}
-            >
-              <IconButton
-                onClick={() => handleSetTilt(true)}
-                sx={{
-                  height: "50%",
-                  width: "100%",
-                  borderRadius: 0,
-                  transition: "0.2s",
-                  background: "white",
-                  borderBottom: "1px solid rgb(178, 178, 250)",
-                  boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                  "&:hover": {
-                    background: "rgb(178, 178, 178)",
-                  },
-                }}
-              >
-                <ArrowDropUpIcon fontSize="inherit" />
-              </IconButton>
-              <IconButton
-                onClick={() => handleSetTilt(false)}
-                sx={{
-                  height: "50%",
-                  width: "100%",
-                  borderRadius: 0,
-                  transition: "0.2s",
-                  background: "white",
-                  boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                  "&:hover": {
-                    background: "rgb(178, 178, 178)",
-                  },
-                }}
-              >
-                <ArrowDropDownIcon fontSize="inherit" />
-              </IconButton>
-            </Stack>
-          </Box>
+          {/* Xoay Map */}
+          <Bearing handleMapBearing={handleMapBearing}></Bearing>
+          {/* Nghiêng Map  */}
+          <Tilt handleMapTilt={handleMapTilt}></Tilt>
           <Box
             sx={{
               width: "12%",
@@ -667,37 +558,13 @@ function Map() {
               gap: 1,
             }}
           >
-            <Box
-              sx={{
-                width: "100%",
-                height: "15%",
-                borderRadius: 1,
-                overflow: "hidden",
-                // backgroundColor: "green",
-              }}
-            >
-              <IconButton
-                onClick={handleMoveCamera}
-                sx={{
-                  height: "100%",
-                  width: "100%",
-                  borderRadius: 0,
-                  transition: "0.2s",
-                  background: "white",
-                  boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                  "&:hover": {
-                    background: "rgb(178, 178, 178)",
-                  },
-                }}
-              >
-                <MyLocationIcon fontSize="inherit" />
-              </IconButton>
-            </Box>
+            <Geolocation
+              handleMapGeolocation={handleMapGeolocation}
+            ></Geolocation>
             <Box
               sx={{
                 width: "100%",
                 height: "30%",
-                // backgroundColor: "green",
                 borderRadius: 1,
                 overflow: "hidden",
               }}
@@ -708,6 +575,7 @@ function Map() {
                 spacing={0}
                 sx={{ height: "100%" }}
               >
+                {/* MAPTYPE  */}
                 <IconButton
                   onClick={handleSetMapType}
                   sx={{
@@ -727,129 +595,21 @@ function Map() {
                 >
                   {show ? "3D" : "2D"}
                 </IconButton>
-                <IconButton
-                  onClick={handleDirectional}
-                  sx={{
-                    height: "50%",
-                    width: "100%",
-                    borderRadius: 0,
-                    transition: "0.2s",
-                    background: "white",
-                    boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                    "&:hover": {
-                      background: "rgb(178, 178, 178)",
-                    },
-                  }}
-                >
-                  <NavigationIcon
-                    fontSize="inherit"
-                    sx={{ color: "#e01a33", transform: `rotate(${rotate}deg)` }}
-                  />
-                </IconButton>
+
+                {/* DIRECTION  */}
+                <Direction
+                  handleDirectional={handleDirectional}
+                  rotate={rotate}
+                ></Direction>
               </Stack>
             </Box>
-            <Box
-              sx={{
-                width: "100%",
-                height: "30%",
-                // backgroundColor: "green",
-                borderRadius: 1,
-                overflow: "hidden",
-              }}
-            >
-              <Stack
-                direction="column"
-                alignItems="center"
-                spacing={0}
-                sx={{ height: "100%" }}
-              >
-                <IconButton
-                  onClick={() => handleSetZoom(true)}
-                  sx={{
-                    height: "50%",
-                    width: "100%",
-                    borderRadius: 0,
-                    transition: "0.2s",
-                    background: "white",
-                    borderBottom: "1px solid rgb(178, 178, 250)",
-                    boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                    "&:hover": {
-                      background: "rgb(178, 178, 178)",
-                    },
-                  }}
-                >
-                  <ZoomInIcon fontSize="inherit" />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleSetZoom(false)}
-                  sx={{
-                    height: "50%",
-                    width: "100%",
-                    borderRadius: 0,
-                    transition: "0.2s",
-                    background: "white",
-                    boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-                    "&:hover": {
-                      background: "rgb(178, 178, 178)",
-                    },
-                  }}
-                >
-                  <ZoomOutIcon fontSize="inherit" />
-                </IconButton>
-              </Stack>
-            </Box>
+            {/* Zoom  */}
+            <Zoom handleMapZoom={handleMapZoom}></Zoom>
           </Box>
         </Box>
-        <Box
-          sx={{
-            height: "10%",
-            width: "100%",
-            backgroundColor: "white",
-            boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-            borderRadius: 1,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
-          <Box
-            sx={{
-              height: "100%",
-              width: "60%",
-              backgroundColor: "white",
-              boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-              borderRight: "1px solid rgb(178, 178, 250)",
-              ml: "4px",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            Map4D data
-            <Link
-              href="http://iotlink.com.vn/"
-              underline="block"
-              sx={{ color: "black" }}
-            >
-              {"@IOT link"}
-            </Link>
-          </Box>
-          <Box
-            sx={{
-              height: "100%",
-              width: "40%",
-              backgroundColor: "white",
-              boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
-              ml: "4px",
-            }}
-          >
-            {" "}
-            contributors{" "}
-          </Box>
-        </Box>
+        <Footer></Footer>
       </Box>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -975,7 +735,8 @@ function Map() {
         </Box>
       ) : (
         <Box />
-      )}
+      )} */}
+      <Panel options = {options}></Panel>
     </Box>
   );
 }
