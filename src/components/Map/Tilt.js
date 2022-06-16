@@ -9,13 +9,11 @@ import "./style.css";
 function Tilt(props) {
   
   const handleMapTilt = props.handleMapTilt;
-const [value, setValue] = useState(0);
+  const tilt = props.tilt;
 const handleSetTilt = (increase) => {
-  
-    increase ? setValue(value + 5) : setValue(value - 5);
-    // cameraRef.current.setTilt(increase ? tilt + 5 : tilt - 5);
-    // my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
-    handleMapTilt(value);
+  let newTilt = tilt;
+    increase ? (newTilt += 5) : (newTilt -= 5);
+    handleMapTilt(newTilt);
   };
     return (
         <Box

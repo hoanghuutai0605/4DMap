@@ -22,28 +22,23 @@ import Crop54Icon from "@mui/icons-material/Crop54";
 
 function Zoom(props) {
     
-  // const [zoom, setZoom] = useState(13);
-    // let my4dMap = props.map;
+
+  // truyen zoom xuong de set props
     let handleMapZoom = props.handleMapZoom;
-    const [zoom, setZoom] = useState(13);
-//     cameraRef = my4dMap.getCamera();
-// console.log("object", cameraRef);
-//     my4dMap.setMapType(map4d.MapType.map3d);
-//     console.log("my4dMap");
-    const handleSetZoom = (isZoomIn) => {
-    if (isZoomIn) {
-      setZoom(zoom + 1);
-    } else {
-      
-      setZoom(zoom - 1);
-      // if (options.zoom < 17) {
-      //   setShow(true);
-      //   my4dMap.setMapType(map4d.MapType.raster);
-      // }
-    }
-    // console.log(my4dMap.current.getBounds(PaddingOptions));
-    // my4dMap.moveCamera(cameraRef);
-    handleMapZoom(zoom);
+    const zoom = props.zoom;
+const handleSetZoom = (isZoom) => {
+  
+  console.log("Zoom", zoom);
+  let newZoom = zoom;
+  console.log("NewZoom", newZoom);
+  if (isZoom) {
+    newZoom = newZoom + 1;
+    console.log("object ++");
+  } else {
+    newZoom -= 1;
+    console.log("object --");
+  }
+  handleMapZoom(newZoom);
   };
 
     return (

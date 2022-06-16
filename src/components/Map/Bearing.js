@@ -9,21 +9,18 @@ import "./style.css";
 
 function Bearing(props) {
   const handleMapBearing = props.handleMapBearing;
-const [bearing, setBearing] = useState(0)
+  const bearing = props.bearing;
 
   const handleSetBearing = (turn) => {
-    if (turn) {
-      setBearing(bearing + 15);
-      // setBearing(rotate + 15);
-    } else {
-      setBearing(bearing - 15);
-      // setBearing(bearing - 15);
-      // setRotate(rotate - 15);
-    }
-    handleMapBearing(bearing);
 
-    // cameraRef.current.setBearing(turn ? bearing + 15 : bearing - 15);
-    // my4dMap.current.moveCamera(cameraRef.current, AnimationOptions);
+
+    let newBearing = bearing;
+    if (turn) {
+      newBearing += 15;
+    } else {
+      newBearing -= 15;
+    }
+    handleMapBearing(newBearing);
   };
 
     return (
