@@ -61,7 +61,7 @@ function Panel(props) {
 
   const my4dMap = props.my4dMap;
 
-  console.log("object", my4dMap.current);
+  // console.log("object", my4dMap.current);
   const [alignment, setAlignment] = useState(null);
 
   const handleChange = (event, newAlignment) => {

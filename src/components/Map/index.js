@@ -15,40 +15,46 @@ import Zoom from "./Zoom";
 import axios from "axios";
 
 function Map() {
+  //   const { createProxyMiddleware } = require("http-proxy-middleware");
 
-  let antennaUrl =
-    "https://bts-gd2.vimap.vn/api/BTS/InforTruAnten/search-tru-anten?code=001053&chuSoHuu=&loaiTram=&loaiCot=&lat=0&lng=0&radius=0";
-  let access_token =
-    "eyJhbGciOiJSUzI1NiIsImtpZCI6IjI0OUIyQkE1ODcwRkM1OUJFMUZEMTg0QTBFMkEwREUxIiwidHlwIjoiYXQrand0In0.eyJuYmYiOjE2NTU5NDYzMzYsImV4cCI6MTY4NzQ4MjMzNiwiaXNzIjoiaHR0cHM6Ly9idHMtZ2QyLnZpbWFwLnZuIiwiYXVkIjoiSW9UIiwiY2xpZW50X2lkIjoiSW9UX0FwcCIsInN1YiI6ImNkMWQ0Zjc5LWExYzEtZDIyNC00OTYxLTM5ZmZkYzQ0MzM2NiIsImF1dGhfdGltZSI6MTY1NTk0NjMzNSwiaWRwIjoibG9jYWwiLCJyb2xlIjoiYWRtaW4iLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOiJGYWxzZSIsImVtYWlsIjoiYWRtaW5AYWJwLmlvIiwiZW1haWxfdmVyaWZpZWQiOiJGYWxzZSIsIm5hbWUiOiJhZG1pbiIsImlhdCI6MTY1NTk0NjMzNiwic2NvcGUiOlsiSW9UIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.kruH_IZHO7PjevI_IwY4xsy2DBfuSHzXpCCAePpm7YUCuCGw09t9EZ79h56B_1gn5VeIC36EPkxkm5veXCxcgwPxpCksdzoaxB0QWwhYU3lnGhCmdIPnysc1EXSTauyAAvrQUgwk_vp2n6tZdAWYP-UJ-M9P9xmG0a9fKS1elxe_nF4BmDT1jXsokmkHo3GJ1PyN1VW9antAuMt_WzfQmjkr6nBfpN-a81fd5VFaTUQ01fY8ML06dFYr2-Fe4xthmsDLJAVMxFWJkRjhQK1f6tMJlkAAFZltJ-HTes6HJXOtzC_-lCyQ7V3jPUBRcbmP2Mbhwz-dMiUNU0_NJv2jWQ";
-  
-useEffect(()=>{
-  const data = async () => {
-    const dataList = await axios
-    .get(antennaUrl, {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-        "Access-Control-Allow-Headers": "https://bts-gd2.vimap.vn/api/BTS/InforTruAnten/search-tru-anten?code=001053&chuSoHuu=&loaiTram=&loaiCot=&lat=0&lng=0&radius=0",
-        "Access-Control-Allow-Origin": "http://localhost:3000/",
-        "Access-Control-Allow-Methods": "get"  
-    },
-    })
-    .then((res) => {
-      console.log(res.data);
-    })
-    .catch((error) => {
-      console.error(error);
-    }); 
-    console.log(dataList);
-  }
-  data();
-  
-}, [])
+  //   module.exports = app => {
+  //     app.use(
+  //         createProxyMiddleware('',{
+  //             target: '',
+  //             changeOrigin: true
+  //         })
+  //     )
+  // }
 
-  
+    let antennaUrl =
+      "https://bts-gd2.vimap.vn/api/BTS/InforTruAnten/search-tru-anten?code=001053&chuSoHuu=&loaiTram=&loaiCot=&lat=0&lng=0&radius=0";
+    let access_token =
+      "eyJhbGciOiJSUzI1NiIsImtpZCI6IjI0OUIyQkE1ODcwRkM1OUJFMUZEMTg0QTBFMkEwREUxIiwidHlwIjoiYXQrand0In0.eyJuYmYiOjE2NTYxNDYzMDksImV4cCI6MTY4NzY4MjMwOSwiaXNzIjoiaHR0cHM6Ly9idHMtZ2QyLnZpbWFwLnZuIiwiYXVkIjoiSW9UIiwiY2xpZW50X2lkIjoiSW9UX0FwcCIsInN1YiI6ImNkMWQ0Zjc5LWExYzEtZDIyNC00OTYxLTM5ZmZkYzQ0MzM2NiIsImF1dGhfdGltZSI6MTY1NjE0NjMwOCwiaWRwIjoibG9jYWwiLCJyb2xlIjoiYWRtaW4iLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOiJGYWxzZSIsImVtYWlsIjoiYWRtaW5AYWJwLmlvIiwiZW1haWxfdmVyaWZpZWQiOiJGYWxzZSIsIm5hbWUiOiJhZG1pbiIsImlhdCI6MTY1NjE0NjMwOSwic2NvcGUiOlsiSW9UIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.qY0HAzp_UzLw-4feOBiVfTjDQmGmUB4My3DZpFynrJNfmRjaJxruLJPradJqD2UYp6hPeIb0D43HQOVDrmeUZGs5YGfZans6q16-uaqxkE_6eg6qBeafRj8tam-V6yYKXe2kQucvyrMUR1sZMDFZwBfeh4617We1un2VKy1Aij-cLrMScjTRYDiUjIRS7XETNH6hARooR8sS4wKqLkKRfhgnflGUOWJ19kj6oJlAHL2qRrspzbcvjv-OTt3gGGy0tKa3RNilYKMNEwx4_kVRrIlWWEVK2_6U9UEXZpRyPJX1V4-rxaAjnji2FbL9FQr4uUpHj3NfU0rfg-xaQTzVKQ";
 
+  useEffect(()=>{
+    const fetchData  = async() => {
+      const dataList = await axios
+      .get(antennaUrl, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "*"
+      },
+      })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+      console.log(dataList);
+    }
+    fetchData();
+    // console.log("object");
+  }, []);
 
-
-
+  // console.log(data);
   // VARIABLE FOR OPTIONS MAP4D
 
   const [zoom, setZoom] = useState(11);
@@ -75,7 +81,7 @@ useEffect(()=>{
     duration: duration,
     animate: true,
   };
-  
+
   useEffect(() => {
     my4dMap.current = new map4d.Map(document.getElementById("map"), options);
     cameraRef.current = my4dMap.current.getCamera();
@@ -85,11 +91,10 @@ useEffect(()=>{
 
   const handleMapZoom = (newZoom) => {
     cameraRef.current.setZoom(newZoom);
-    setZoom(newZoom)
+    setZoom(newZoom);
     if (newZoom < 17) {
       setShow(true);
       my4dMap.current.setMapType(map4d.MapType.raster);
-      
     }
     my4dMap.current.moveCamera(cameraRef.current);
   };
@@ -164,23 +169,26 @@ useEffect(()=>{
           zIndex: 1,
         }}
       ></Box>
-      <Box sx={{
-        position: "absolute",
+      <Box
+        sx={{
+          position: "absolute",
           // bottom: 5,
-          top: {xs: 0, md: 'none'},
+          top: { xs: 0, md: "none" },
           left: 0,
           right: 10,
           height: "100vh",
           width: 350,
           backgroundColor: "white",
           zIndex: 5,
-      }}>
+        }}
+      >
         <Header></Header>
       </Box>
-      <Box sx={{
-        position: "absolute",
+      <Box
+        sx={{
+          position: "absolute",
           bottom: 5,
-          top: {xs: 0, md: 'none'},
+          top: { xs: 0, md: "none" },
           left: 0,
           right: 10,
           height: "100vh",
@@ -189,7 +197,8 @@ useEffect(()=>{
           // borderTopLeftRadius: "100%",
           backgroundColor: "white",
           zIndex: 2,
-      }}>
+        }}
+      >
         <MenuLeft></MenuLeft>
       </Box>
       <Box
@@ -223,7 +232,10 @@ useEffect(()=>{
           }}
         >
           {/* Xoay Map */}
-          <Bearing handleMapBearing={handleMapBearing} bearing = {bearing}></Bearing>
+          <Bearing
+            handleMapBearing={handleMapBearing}
+            bearing={bearing}
+          ></Bearing>
           {/* Nghiêng Map  */}
           <Tilt handleMapTilt={handleMapTilt} tilt={tilt}></Tilt>
           <Box
